@@ -18,5 +18,16 @@
   "bugs": {
     "url": "https://github.com/rweda/mono-symlink/issues"
   },
-  "homepage": "https://github.com/rweda/mono-symlink#readme"
+  "homepage": "https://github.com/rweda/mono-symlink#readme",
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "chai-fs": "^1.0.0",
+    "child-process-promise": "^2.2.1",
+    "mocha": "^3.3.0",
+    "tmp-promise": "^1.0.3"
+  },
+  "dependencies": {
+    "bluebird": "^3.5.0",
+    "fs-extra": "^3.0.0"
+  }
 }
