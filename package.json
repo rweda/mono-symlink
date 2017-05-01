@@ -1,0 +1,22 @@
+{
+  "name": "mono-symlink",
+  "version": "0.0.0",
+  "description": "Handles symbolic links between NodeJS packages inside a monolithic codebase.",
+  "main": "Symlinker.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rweda/mono-symlink.git"
+  },
+  "author": "Redwood EDA (http://redwoodeda.com/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/rweda/mono-symlink/issues"
+  },
+  "homepage": "https://github.com/rweda/mono-symlink#readme"
+}
