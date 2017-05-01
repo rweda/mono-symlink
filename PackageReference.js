@@ -25,17 +25,26 @@ class PackageReference {
     this.type = type;
   }
 
+  get symlink() { return path.resolve(this.source, "node_modules", this.name); }
+
   /**
    * Create a symbolic link for this reference.
    * @return {Promise} resolves when the symbolic link has been created.
   */
   create() {
-    let symlink = path.resolve(this.source, "node_modules", this.name);
     let target = path.resolve(this.source, this.location.replace("file:", ""));
     return fs
-      .removeAsync(symlink)
-      .catch(err => yes)
-      .then(() => fs.ensureSymlinkAsync(target, symlink));
+      .removeAsync(this.symlink)
+      .catch(err => true)
+      .then(() => fs.ensureSymlinkAsync(target, this.symlink));
+  }
+
+  /**
+   * Remove the symbolic link created for this reference.
+   * @return {Promise} resolves when the symbolic links has been removed.
+  */
+  remove() {
+    return fs.removeAsync(this.symlink);
   }
 
 }
