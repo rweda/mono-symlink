@@ -7,7 +7,8 @@
     "test": "test"
   },
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "docs": "jsdoc -c jsdoc.json"
   },
   "repository": {
     "type": "git",
@@ -23,6 +24,8 @@
     "chai": "^3.5.0",
     "chai-fs": "^1.0.0",
     "child-process-promise": "^2.2.1",
+    "docdash": "^0.4.0",
+    "jsdoc": "^3.4.3",
     "mocha": "^3.3.0",
     "tmp-promise": "^1.0.3"
   },
