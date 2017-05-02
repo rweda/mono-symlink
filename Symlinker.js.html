@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Symlinker.js - Documentation</title>
+
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="PackageReference.html">PackageReference</a><ul class='methods'><li data-type='method'><a href="PackageReference.html#create">create</a></li><li data-type='method'><a href="PackageReference.html#remove">remove</a></li></ul></li><li><a href="Symlinker.html">Symlinker</a><ul class='methods'><li data-type='method'><a href="Symlinker.html#create">create</a></li><li data-type='method'><a href="Symlinker.html#filter">filter</a></li><li data-type='method'><a href="Symlinker.html#parseManifest">parseManifest</a></li><li data-type='method'><a href="Symlinker.html#remove">remove</a></li></ul></li></ul><h3><a href="global.html">Global</a></h3>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">Symlinker.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>const Promise = require("bluebird");
+const fs = Promise.promisifyAll(require("fs"));
+const path = require("path");
+
+/**
+ * Options to configure {@link Symlinker}.
+ * @typedef {Object} SymlinkerOptions
+*/
+
+
+/**
+ * Constructs and removes symbolic links between local packages a monolithic repository.
+*/
+class Symlinker {
+
+  /**
+   * A {@link PackageReference} class to use when manipulating packages.
+   * Can be overridden by a class that extends {@link PackageReference}.
+   * @example &lt;caption>Overriding PackageReference&lt;/caption>
+   * class CustomPackageReference extends PackageReference { }
+   * Symlinker.PackageReference = CustomPackageReference;
+   * let linker = new Symlinker();
+   * let refs = linker.filter(...); // => Array&lt;CustomPackageReference>
+  */
+  static get PackageReference() { return this._packageReference || require("./PackageReference"); }
+
+  static set PackageReference(val) { this._packageReference = val; }
+
+  /**
+   * @param {SymlinkerOptions} opts configuration options.
+  */
+  constructor(opts) {
+    /**
+     * Configuration options.
+     * @type {ManifestSearchOptions}
+    */
+    this._opts = opts || {};
+  }
+
+  /**
+   * Given all package dependencies, provides the symbolic links that should be created, filtering out dependencies that
+   * shouldn't be symlinked.
+   * @param {String} source the location of the manifest file being analyzed
+   * @param {null|Object&lt;String, String>} dependencies the list of dependencies for a package.
+   * @param {null|Object&lt;String, String>} devDependencies the list of development dependencies for a package.
+   * @return {Array&lt;PackageReference>} the packages that should be symbolicly linked.
+  */
+  filter(source, dependencies, devDependencies) {
+    let PackageReference = this.constructor.PackageReference;
+    let refs = [];
+    let deps = Object.assign({}, dependencies, devDependencies);
+    for (var name in deps) {
+      let location = deps[name];
+      if(!deps.hasOwnProperty(name)) { continue; }
+      if(location.indexOf("file:") &lt; 0) { continue; }
+      let type = dependencies &amp;&amp; [name] ? "dependency" : "devDependency";
+      refs.push(new PackageReference(path.dirname(source), name, location, type));
+    }
+    return refs;
+  }
+
+  /**
+   * Opens and reads a manifest file.  `fs.readFile` used instead of `require` to ensure that the file isn't cached so
+   * changes to the file are caught.
+   * @param {String} manifest the path to a manifest (`package.json`) file.
+   * @return {Promise&lt;Object>} resolves to the contents of the manifest file.
+  */
+  parseManifest(manifest) {
+    return fs.readFileAsync(manifest, "utf8").then(JSON.parse);
+  }
+
+  /**
+   * Create symbolic links for all local resources inside a package.
+   * @param {String} manifest the path to a manifest (`package.json`) file.
+   * @return {Promise} resolves when all symbolic links have been created.
+  */
+  create(manifest) {
+    return this.parseManifest(manifest)
+      .then(({name, dependencies, devDependencies}) => this.filter(manifest, dependencies, devDependencies))
+      .then((symlinks) => Promise.all(symlinks.map(symlink => symlink.create())));
+  }
+
+  /**
+   * Remove symbolic links to all local resources inside a package.
+   * Reverses {@link Symlinker#create}, based on the listed `dependencies` and `devDependencies`.  If a package has been
+   * renamed or otherwise changed, the symlink based on the old name will not be removed.
+   * @param {String} manifest the path to a manifest (`package.json`) file.
+   * @return {Promise} resolves when the symbolic links have been removed.
+  */
+  remove(manifest) {
+    return this.parseManifest(manifest)
+      .then(({name, dependencies, devDependencies}) => this.filter(manifest, dependencies, devDependencies))
+      .then((symlinks) => Promise.all(symlinks.map(symlink => symlink.remove())));
+  }
+
+}
+
+module.exports = Symlinker;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue May 02 2017 18:27:05 GMT+0000 (UTC) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/linenumber.js"></script>
+</body>
+</html>
