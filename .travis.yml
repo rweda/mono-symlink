@@ -1,2 +1,24 @@
 language: node_js
 node_js: 6
+
+branches:
+  except:
+    - gh-pages
+
+before_install:
+- openssl aes-256-cbc -K $encrypted_de8e6347be69_key -iv $encrypted_de8e6347be69_iv
+  -in id_rsa.enc -out id_rsa -d
+
+env:
+  global:
+    - DEPLOY_BRANCH="master"
+    - SOURCE_DIR="docs"
+    - TARGET_BRANCH="gh-pages"
+    - SSH_KEY="id_rsa"
+    - GIT_NAME="RWEDA Bot"
+    - GIT_EMAIL="rwedabot@redwoodeda.com"
+
+script:
+  - npm test
+  - npm run-script docs
+  - '"$(npm bin)/gh-pages-travis"'
