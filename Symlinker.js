@@ -32,7 +32,7 @@ class Symlinker {
   constructor(opts) {
     /**
      * Configuration options.
-     * @type {ManifestSearchOptions}
+     * @type {SymlinkerOptions}
     */
     this._opts = opts || {};
   }
